@@ -1,10 +1,9 @@
 services:
   - type: web
-    name: telegram-bot
+    name: telegram-menu-bot
     env: python
-    plan: free
-    buildCommand: ""
+    buildCommand: pip install -r requirements.txt
     startCommand: python bot.py
     envVars:
       - key: BOT_TOKEN
-        value: 7474385622:AAExlqqWgsUqeeHuBUbl9U0JE97fpcEvI_M
+        value: 8090246543:AAGgG-xWjC28FD2JZDJajo9pOXdS3atlSbg

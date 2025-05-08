@@ -1,16 +1,18 @@
-import telebot
-import os
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")  # Token được lấy từ biến môi trường
-bot = telebot.TeleBot(BOT_TOKEN)
+async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "📋 MENU:\n1. 📰 Tin tức\n2. 📅 Lịch trình\n3. ❓ Trợ giúp"
+    )
 
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
-    bot.send_message(message.chat.id, "Chào bạn! Gõ /menu để xem thực đơn.")
+if __name__ == '__main__':
+    import os
+    TOKEN = os.environ.get("BOT_TOKEN")
 
-@bot.message_handler(commands=['menu'])
-def send_menu(message):
-    menu = "📋 *Menu hôm nay:*\n\n🍜 Món A: Phở bò\n🍛 Món B: Cơm tấm\n🍲 Món C: Bún riêu"
-    bot.send_message(message.chat.id, menu, parse_mode="Markdown")
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CommandHandler("menu", menu_command))
 
-bot.infinity_polling()  # Sử dụng infinity_polling cho ổn định khi deploy
+    print("Bot đang chạy...")
+    app.run_polling()
+
