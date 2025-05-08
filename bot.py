@@ -1,10 +1,15 @@
+from flask import Flask
+import threading
+
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import os
 
-TARGET_CHAT_ID = os.environ.get("TARGET_CHAT_ID")
+app_flask = Flask(__name__)
+
+#TARGET_CHAT_ID = os.environ.get("TARGET_CHAT_ID")
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -22,17 +27,43 @@ async def send_monthly_reminder(app):
         text="📣 Vui lòng chọn trà/cafe tháng này. Nhập lệnh /menu để xem chi tiết các món."
     )
 
-if __name__ == '__main__':
-    TOKEN = os.environ.get("BOT_TOKEN")
-    app = ApplicationBuilder().token(TOKEN).build()
+#if __name__ == '__main__':
+    #TOKEN = os.environ.get("BOT_TOKEN")
+    #app = ApplicationBuilder().token(TOKEN).build()
 
-    app.add_handler(CommandHandler("start", start_command))
-    app.add_handler(CommandHandler("menu", menu_command))
+    #app.add_handler(CommandHandler("start", start_command))
+    #app.add_handler(CommandHandler("menu", menu_command))
+
+    #scheduler = BackgroundScheduler(timezone="Asia/Ho_Chi_Minh")
+    #scheduler.add_job(send_monthly_reminder, 'cron', day=6, hour=8, minute=0, args=[app])
+    #scheduler.start()
+
+    #print("Bot đang chạy...")
+    #app.run_polling()
+    
+    
+
+
+# Chạy bot bằng polling
+def run_bot():
+    TOKEN = os.environ.get("BOT_TOKEN")
+    bot_app = ApplicationBuilder().token(TOKEN).build()
+    bot_app.add_handler(CommandHandler("start", start_command))
+    bot_app.add_handler(CommandHandler("menu", menu_command))
 
     scheduler = BackgroundScheduler(timezone="Asia/Ho_Chi_Minh")
-    scheduler.add_job(send_monthly_reminder, 'cron', day=6, hour=8, minute=0, args=[app])
+    scheduler.add_job(send_monthly_reminder, 'cron', day=6, hour=8, minute=0, args=[bot_app])
     scheduler.start()
 
-    print("Bot đang chạy...")
-    app.run_polling()
+    bot_app.run_polling()
 
+# Route mặc định cho Flask
+@app_flask.route('/')
+def index():
+    return "Bot is running!"
+
+if __name__ == '__main__':
+    # Chạy bot trên luồng riêng
+    threading.Thread(target=run_bot).start()
+    # Chạy Flask server để Render không báo lỗi
+    app_flask.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
