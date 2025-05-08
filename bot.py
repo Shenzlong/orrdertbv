@@ -13,7 +13,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "📋 MENU:\n1. 📰 Tin tức\n2. 📅 Lịch trình\n3. ❓ Trợ giúp"
+        "📋 MENU:\n1. cup   - Paper cup(1 case/10 pcs)\n2. vina  - Vinacafe(24 gói/ bịch)\n3. net   - Netcafe(18 gói/ hộp)\n4. leg   - Legend(12 gói/ hộp)\n5. g7    - G7(21 gói/ hộp)\n6. bg7   - Black G7(15 gói/ hộp)\n7. bviet - Black Cafe Việt(35 gói/ bịch)\n8. gin   - Ginger Tea\n9. lip   - Lipton ice tea\n10. blip  - Black lipton tea\n10. atis  - Atiso tea\n12. mat   - Matcha tea\n13. royal - Royal milk tea Vàng\n14. milo  - Milo(10 gói/ dây)\n15. phin  - Cà phê phin(500gr/ hộp)"
     )
 
 async def send_monthly_reminder(app):
