@@ -7,3 +7,5 @@ services:
     envVars:
       - key: BOT_TOKEN
         value: 8090246543:AAGgG-xWjC28FD2JZDJajo9pOXdS3atlSbg
+      - key: TARGET_CHAT_ID
+        value: -4661676788  # chat_id của nhóm (dấu trừ ở đầu là đúng)
