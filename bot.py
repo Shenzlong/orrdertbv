@@ -7,6 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import json
 import os
+import pandas as pd
 
 # ==== Biến môi trường ====
 TOKEN = os.environ.get("BOT_TOKEN")
@@ -110,6 +111,37 @@ async def receive_menu_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"✔️ Đã thêm: {code.strip()} - {desc.strip()}")
     return ENTER_ITEMS
 
+# ==== /list ====
+async def list_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = "📋 Danh sách toàn bộ menu:\n"
+    for brand, items in menu_data.items():
+        msg += f"\n🔸 *{brand}*\n"
+        for code, desc in items:
+            msg += f"  - {code}: {desc}\n"
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+# ==== /export ====
+async def export_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        rows = []
+        for brand, items in menu_data.items():
+            for code, desc in items:
+                rows.append({"Menu": brand, "Mã": code, "Mô tả": desc})
+        df = pd.DataFrame(rows)
+        file_path = "menu_export.xlsx"
+        df.to_excel(file_path, index=False)
+        with open(file_path, "rb") as f:
+            await update.message.reply_document(f, filename=file_path)
+    except Exception as e:
+        await update.message.reply_text("❌ Không thể xuất dữ liệu.")
+
+# ==== /clear ====
+async def clear_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    for k in menu_data:
+        menu_data[k] = []
+    save_menu()
+    await update.message.reply_text("⚠️ Đã xóa toàn bộ món trong các menu.")
+
 # ==== Hủy bỏ hội thoại ====
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("❌ Đã hủy cập nhật.")
@@ -130,6 +162,10 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("menu", menu_command))
     app.add_handler(CallbackQueryHandler(handle_menu_selection, pattern="^menu|"))
     app.add_handler(CallbackQueryHandler(handle_item_selection, pattern="^item|"))
+
+    app.add_handler(CommandHandler("list", list_menu))
+    app.add_handler(CommandHandler("export", export_menu))
+    app.add_handler(CommandHandler("clear", clear_menu))
 
     update_conv = ConversationHandler(
         entry_points=[CommandHandler("update", update_menu_command)],
