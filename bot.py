@@ -1,33 +1,34 @@
-import os
-import json
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
-    ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
+    ApplicationBuilder, CommandHandler, CallbackQueryHandler,
+    ContextTypes
 )
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime
 import pandas as pd
 import io
+import os
+import json
 
 # Biến môi trường
 TOKEN = os.environ.get("BOT_TOKEN")
 TARGET_CHAT_ID = os.environ.get("TARGET_CHAT_ID")
-MENU_JSON_FILE = 'menu.json'
 
-# Khởi tạo MENU_STRUCTURE
+# Tải menu từ file menu.json
 MENU_STRUCTURE = {}
-
-# Đọc menu từ file JSON
 def load_menu_structure():
-    global MENU_STRUCTURE
-    try:
-        with open(MENU_JSON_FILE, 'r', encoding='utf-8') as f:
-            MENU_STRUCTURE = json.load(f)
-    except (json.JSONDecodeError, FileNotFoundError) as e:
-        print(f"Đọc menu từ file thất bại: {e}")
-        MENU_STRUCTURE = {}
+    with open("menu.json", "r", encoding="utf-8") as f:
+        return json.load(f)
 
-# Cập nhật menu từ file JSON mới
 def reload_menu():
-    load_menu_structure()
+    global MENU_STRUCTURE
+    MENU_STRUCTURE = load_menu_structure()
+
+# Gọi khi khởi động
+reload_menu()
+
+# Lưu lựa chọn người dùng: {user_id: (tên, mã món)}
+user_choices = {}
 
 # /start
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -37,10 +38,6 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # /menu – Hiển thị menu cấp 1
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not MENU_STRUCTURE:
-        await update.message.reply_text("❌ Menu chưa được cập nhật.")
-        return
-
     keyboard = [
         [InlineKeyboardButton(text=data["name"], callback_data=f"menu_{code}")]
         for code, data in MENU_STRUCTURE.items()
@@ -70,39 +67,18 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
             )
         return
 
-# /update – Cập nhật menu từ file JSON
-async def handle_file_upload(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.document:
-        # Lấy thông tin tệp tin
-        file = update.message.document
-        file_name = file.file_name
-        print(f"Đã nhận tệp tin: {file_name}")  # Debug để xem file nhận được
-
-        # Tải file về
-        file_path = await file.get_file()
-        print(f"Tải file từ đường dẫn: {file_path.file_path}")  # Debug đường dẫn tải về
-        file_path.download_to_drive(MENU_JSON_FILE)
-
-        # Reload lại menu sau khi tải file mới
-        try:
-            reload_menu()  # Gọi lại reload menu ngay sau khi cập nhật file
-            await update.message.reply_text(f"✅ Menu đã được cập nhật thành công từ file `{file_name}`!")
-        except json.JSONDecodeError as e:
-            await update.message.reply_text(f"❌ Lỗi JSON: {e}")
-        except Exception as e:
-            await update.message.reply_text(f"❌ Lỗi khi cập nhật menu: {e}")
-    else:
-        await update.message.reply_text("❌ Vui lòng gửi một tệp tin JSON hợp lệ.")
+    # Lưu lựa chọn món
+    user_choices[user_id] = (user_name, data)
+    await query.edit_message_text(text=f"✅ {user_name} đã chọn {data}.")
 
 # /list – Hiển thị danh sách người dùng đã chọn
 async def list_choices_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not MENU_STRUCTURE:
-        await update.message.reply_text("❌ Menu chưa được cập nhật.")
+    if not user_choices:
+        await update.message.reply_text("📭 Hiện chưa có ai chọn món.")
         return
-    
+
     response = "📋 Danh sách đặt món:\n"
-    # Giả sử user_choices là dictionary lưu lựa chọn của người dùng
-    for user_id, (name, code) in user_choices.items():
+    for _, (name, code) in user_choices.items():
         response += f"- {name}: {code}\n"
 
     await update.message.reply_text(response)
@@ -133,10 +109,23 @@ async def export_choices_command(update: Update, context: ContextTypes.DEFAULT_T
         caption="📄 Danh sách chọn món (Excel)"
     )
 
+# /update – Tải lại menu từ file
+async def update_menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        reload_menu()
+        await update.message.reply_text("✅ Đã tải lại menu từ file `menu.json`.")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Lỗi khi tải menu: {str(e)}")
+
+# Gửi nhắc nhở định kỳ
+async def send_monthly_reminder(app):
+    await app.bot.send_message(
+        chat_id=TARGET_CHAT_ID,
+        text="📣 Vui lòng chọn trà/cafe tháng này. Nhập lệnh /menu để xem chi tiết các món."
+    )
+
 # Chạy bot
 if __name__ == '__main__':
-    load_menu_structure()  # Đọc file menu ngay khi bắt đầu bot
-
     app = ApplicationBuilder().token(TOKEN).build()
 
     # Handlers
@@ -146,7 +135,12 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler("list", list_choices_command))
     app.add_handler(CommandHandler("reset", reset_choices_command))
     app.add_handler(CommandHandler("export", export_choices_command))
-    app.add_handler(MessageHandler(filters.Document.ALL, handle_file_upload))  # Xử lý file upload cho lệnh /update
+    app.add_handler(CommandHandler("update", update_menu_command))
+
+    # Scheduler
+    scheduler = BackgroundScheduler(timezone="Asia/Ho_Chi_Minh")
+    scheduler.add_job(send_monthly_reminder, 'cron', day=6, hour=8, minute=0, args=[app])
+    scheduler.start()
 
     print("Bot đang chạy...")
     app.run_polling()
