@@ -43,7 +43,7 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for code, data in MENU_STRUCTURE.items()
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("🏢 Chọn khu vực đặt món:", reply_markup=reply_markup)
+    await update.message.reply_text("🏢 Chọn MENU:", reply_markup=reply_markup)
 
 # Xử lý lựa chọn menu cấp 1 hoặc món
 async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -69,7 +69,7 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     # Lưu lựa chọn món
     user_choices[user_id] = (user_name, data)
-    await query.edit_message_text(text=f"✅ {user_name} đã chọn {data}.")
+    await query.edit_message_text(text=f"{user_name} đã chọn {data}.")
 
 # /list – Hiển thị danh sách người dùng đã chọn
 async def list_choices_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
