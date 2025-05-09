@@ -69,7 +69,7 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     # Lưu lựa chọn món
     user_choices[user_id] = (user_name, data)
-    await query.edit_message_text(text=f"✅ {user_name}, bạn đã chọn món {data} thành công!")
+    await query.edit_message_text(text=f"{user_name} đã chọn {data}.")
 
 # /list – Hiển thị danh sách người dùng đã chọn
 async def list_choices_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
