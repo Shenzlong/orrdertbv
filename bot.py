@@ -1,4 +1,6 @@
+
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.constants import ChatAction
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, CallbackQueryHandler,
     ContextTypes, ConversationHandler, MessageHandler, filters
@@ -111,6 +113,39 @@ async def receive_menu_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"✔️ Đã thêm: {code.strip()} - {desc.strip()}")
     return ENTER_ITEMS
 
+# ==== /uploadmenu ====
+async def upload_menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("📎 Vui lòng gửi file `menu_data.json` để cập nhật toàn bộ menu.")
+
+# ==== Nhận file JSON và cập nhật menu ====
+async def handle_json_upload(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    document = update.message.document
+    if not document.file_name.endswith(".json"):
+        await update.message.reply_text("⚠️ Vui lòng gửi file .json hợp lệ.")
+        return
+
+    file = await document.get_file()
+    file_path = "uploaded_menu.json"
+    await file.download_to_drive(file_path)
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            new_data = json.load(f)
+
+        for key, value in new_data.items():
+            if not isinstance(value, list):
+                raise ValueError(f"❌ Menu '{key}' không hợp lệ, phải là danh sách các món.")
+            for item in value:
+                if not isinstance(item, list) or len(item) != 2:
+                    raise ValueError(f"❌ Món trong '{key}' không đúng định dạng [mã, mô tả].")
+
+        global menu_data
+        menu_data = new_data
+        save_menu()
+        await update.message.reply_text("✅ Đã cập nhật menu từ file thành công.")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Lỗi khi xử lý file: {e}")
+
 # ==== /list ====
 async def list_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = "📋 Danh sách toàn bộ menu:\n"
@@ -166,6 +201,8 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("list", list_menu))
     app.add_handler(CommandHandler("export", export_menu))
     app.add_handler(CommandHandler("clear", clear_menu))
+    app.add_handler(CommandHandler("uploadmenu", upload_menu_command))
+    app.add_handler(MessageHandler(filters.Document.FILE_EXTENSION("json"), handle_json_upload))
 
     update_conv = ConversationHandler(
         entry_points=[CommandHandler("update", update_menu_command)],
