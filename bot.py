@@ -8,42 +8,24 @@ from datetime import datetime
 import pandas as pd
 import io
 import os
+import json
 
 # Biến môi trường
 TOKEN = os.environ.get("BOT_TOKEN")
 TARGET_CHAT_ID = os.environ.get("TARGET_CHAT_ID")
 
-# Cấu trúc menu cấp 1 và danh sách món tương ứng
-MENU_STRUCTURE = {
-    "scm": {
-        "name": "SCM Office",
-        "items": [
-            ("cup", "Paper cup (1 case/10 pcs)"),
-            ("vina", "Vinacafe (24 gói/ bịch)"),
-            ("net", "Netcafe (18 gói/ hộp)"),
-            ("leg", "Legend (12 gói/ hộp)"),
-            ("g7", "G7 (21 gói/ hộp)"),
-            ("bg7", "Black G7 (15 gói/ hộp)"),
-            ("bviet", "Black Cafe Việt (35 gói/ bịch)"),
-            ("gin", "Ginger Tea"),
-            ("lip", "Lipton ice tea"),
-            ("blip", "Black lipton tea"),
-            ("atis", "Atiso tea"),
-            ("mat", "Matcha tea"),
-            ("royal", "Royal milk tea Vàng"),
-            ("milo", "Milo (10 gói/ dây)"),
-            ("phin", "Cà phê phin (500gr/ hộp)"),
-        ]
-    },
-    "hr": {
-        "name": "HR Office",
-        "items": [
-            ("coca", "Coca Cola"),
-            ("pepsi", "Pepsi Light"),
-            ("sprite", "Sprite"),
-        ]
-    }
-}
+# Tải menu từ file menu.json
+MENU_STRUCTURE = {}
+def load_menu_structure():
+    with open("menu.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def reload_menu():
+    global MENU_STRUCTURE
+    MENU_STRUCTURE = load_menu_structure()
+
+# Gọi khi khởi động
+reload_menu()
 
 # Lưu lựa chọn người dùng: {user_id: (tên, mã món)}
 user_choices = {}
@@ -127,6 +109,14 @@ async def export_choices_command(update: Update, context: ContextTypes.DEFAULT_T
         caption="📄 Danh sách chọn món (Excel)"
     )
 
+# /update – Tải lại menu từ file
+async def update_menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        reload_menu()
+        await update.message.reply_text("✅ Đã tải lại menu từ file `menu.json`.")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Lỗi khi tải menu: {str(e)}")
+
 # Gửi nhắc nhở định kỳ
 async def send_monthly_reminder(app):
     await app.bot.send_message(
@@ -145,6 +135,7 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler("list", list_choices_command))
     app.add_handler(CommandHandler("reset", reset_choices_command))
     app.add_handler(CommandHandler("export", export_choices_command))
+    app.add_handler(CommandHandler("update", update_menu_command))
 
     # Scheduler
     scheduler = BackgroundScheduler(timezone="Asia/Ho_Chi_Minh")
