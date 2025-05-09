@@ -1,30 +1,30 @@
 {
-    "scm": {
-        "name": "SCM Office",
-        "items": [
-            ("cup", "Paper cup (1 case/10 pcs)"),
-            ("vina", "Vinacafe (24 gói/ bịch)"),
-            ("net", "Netcafe (18 gói/ hộp)"),
-            ("leg", "Legend (12 gói/ hộp)"),
-            ("g7", "G7 (21 gói/ hộp)"),
-            ("bg7", "Black G7 (15 gói/ hộp)"),
-            ("bviet", "Black Cafe Việt (35 gói/ bịch)"),
-            ("gin", "Ginger Tea"),
-            ("lip", "Lipton ice tea"),
-            ("blip", "Black lipton tea"),
-            ("atis", "Atiso tea"),
-            ("mat", "Matcha tea"),
-            ("royal", "Royal milk tea Vàng"),
-            ("milo", "Milo (10 gói/ dây)"),
-            ("phin", "Cà phê phin (500gr/ hộp)"),
-        ]
-    },
-    "hr": {
-        "name": "HR Office",
-        "items": [
-            ("coca", "Coca Cola"),
-            ("pepsi", "Pepsi Light"),
-            ("sprite", "Sprite"),
-        ]
-    }
+  "scm": {
+    "name": "SCM Office",
+    "items": [
+      ["cup", "Paper cup (1 case/10 pcs)"],
+      ["vina", "Vinacafe (24 gói/ bịch)"],
+      ["net", "Netcafe (18 gói/ hộp)"],
+      ["leg", "Legend (12 gói/ hộp)"],
+      ["g7", "G7 (21 gói/ hộp)"],
+      ["bg7", "Black G7 (15 gói/ hộp)"],
+      ["bviet", "Black Cafe Việt (35 gói/ bịch)"],
+      ["gin", "Ginger Tea"],
+      ["lip", "Lipton ice tea"],
+      ["blip", "Black lipton tea"],
+      ["atis", "Atiso tea"],
+      ["mat", "Matcha tea"],
+      ["royal", "Royal milk tea Vàng"],
+      ["milo", "Milo (10 gói/ dây)"],
+      ["phin", "Cà phê phin (500gr/ hộp)"]
+    ]
+  },
+  "hr": {
+    "name": "HR Office",
+    "items": [
+      ["coca", "Coca Cola"],
+      ["pepsi", "Pepsi Light"],
+      ["sprite", "Sprite"]
+    ]
+  }
 }
