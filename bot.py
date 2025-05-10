@@ -37,7 +37,7 @@ user_choices = {}  # {user_id: {name, drink_code, sweetness, tea, topping}}
 user_states = {}   # {user_id: {step, options}}
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 Chào mừng bạn với bot đặt trà/cafe!\nGõ /menu để xem danh sách đồ uống.")
+    await update.message.reply_text("👋 Chào mừng bạn với bot đặt trà/cafe!\nGõ: \n /menu để xem danh sách đồ uống.\n /list để xem danh sách các thành viên đã đặt món.\n /reset để xoá danh sách đã chọn món.\n /export để xuất danh sách đã chọn món ra excel.")
 
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
