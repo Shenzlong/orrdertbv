@@ -2,29 +2,31 @@
   "scm": {
     "name": "SCM Office",
     "items": [
-      ["cup", "Paper cup (1 case/10 pcs)"],
-      ["vina", "Vinacafe (24 gói/ bịch)"],
-      ["net", "Netcafe (18 gói/ hộp)"],
-      ["leg", "Legend (12 gói/ hộp)"],
-      ["g7", "G7 (21 gói/ hộp)"],
-      ["bg7", "Black G7 (15 gói/ hộp)"],
-      ["bviet", "Black Cafe Việt (35 gói/ bịch)"],
-      ["gin", "Ginger Tea"],
-      ["lip", "Lipton ice tea"],
-      ["blip", "Black lipton tea"],
-      ["atis", "Atiso tea"],
-      ["mat", "Matcha tea"],
-      ["royal", "Royal milk tea Vàng"],
-      ["milo", "Milo (10 gói/ dây)"],
-      ["phin", "Cà phê phin (500gr/ hộp)"]
+      { "code": "cup", "name": "Paper cup (1 case/10 pcs)", "options": [] },
+      { "code": "vina", "name": "Vinacafe (24 gói/ bịch)", "options": [] },
+      { "code": "net", "name": "Netcafe (18 gói/ hộp)", "options": [] },
+      { "code": "leg", "name": "Legend (12 gói/ hộp)", "options": [] },
+      { "code": "g7", "name": "G7 (21 gói/ hộp)", "options": [] },
+      { "code": "bg7", "name": "Black G7 (15 gói/ hộp)", "options": [] },
+      { "code": "bviet", "name": "Black Cafe Việt (35 gói/ bịch)", "options": [] },
+      { "code": "gin", "name": "Ginger Tea", "options": [] },
+      { "code": "lip", "name": "Lipton ice tea", "options": [] },
+      { "code": "blip", "name": "Black lipton tea", "options": [] },
+      { "code": "atis", "name": "Atiso tea", "options": [] },
+      { "code": "mat", "name": "Matcha tea", "options": [] },
+      { "code": "royal", "name": "Royal milk tea Vàng", "options": [] },
+      { "code": "milo", "name": "Milo (10 gói/ dây)", "options": [] },
+      { "code": "phin", "name": "Cà phê phin (500gr/ hộp)", "options": [] }
     ]
   },
   "hr": {
     "name": "HR Office",
     "items": [
-      ["coca", "Coca Cola"],
-      ["pepsi", "Pepsi Light"],
-      ["sprite", "Sprite"]
+      { "code": "coca", "name": "Coca Cola", "options": ["sweetness","tea","topping"] },
+      { "code": "pepsi", "name": "Pepsi Light", "options": [] },
+      { "code": "sprite", "name": "Sprite", "options": [] },
+      { "code": "redb", "name": "Red bull", "options": [] }
     ]
   }
 }
+
