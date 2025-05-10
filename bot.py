@@ -33,17 +33,12 @@ def reload_data():
 # Gọi khi khởi động
 reload_data()
 
-# Lưu lựa chọn người dùng: {user_id: {"name": ..., "drink_code": ..., "sweetness": ..., "tea": ..., "topping": ...}}
-user_choices = {}
-user_states = {}
+user_choices = {}  # {user_id: {name, drink_code, sweetness, tea, topping}}
+user_states = {}   # {user_id: {step, options}}
 
-# /start
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "👋 Chào mừng bạn với bot đặt trà/cafe!\nGõ /menu để xem danh sách đồ uống."
-    )
+    await update.message.reply_text("👋 Chào mừng bạn với bot đặt trà/cafe!\nGõ /menu để xem danh sách đồ uống.")
 
-# /menu – Hiển thị menu cấp 1
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton(text=data["name"], callback_data=f"menu_{code}")]
@@ -52,7 +47,6 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("🏢 Chọn MENU:", reply_markup=reply_markup)
 
-# Xử lý callback
 async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -65,8 +59,8 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
         if menu_code in MENU_STRUCTURE:
             items = MENU_STRUCTURE[menu_code]["items"]
             keyboard = [
-                [InlineKeyboardButton(text=f"{code} - {desc}", callback_data=f"item_{code}")]
-                for code, desc in items
+                [InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")]
+                for item in items
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await query.edit_message_text(
@@ -74,33 +68,33 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
             )
         return
 
-    # Xử lý chọn món
     if data.startswith("item_"):
         item_code = data.replace("item_", "")
-        # Tìm menu chứa item_code
         selected_item = None
         for menu in MENU_STRUCTURE.values():
-            for code, name in menu["items"]:
-                if code == item_code:
-                    selected_item = {
-                        "code": code,
-                        "name": name,
-                        "options": menu.get("options", {})
-                    }
+            for item in menu["items"]:
+                if item["code"] == item_code:
+                    selected_item = item
                     break
 
         if selected_item:
-            user_choices[user_id] = {"name": user_name, "drink_code": f"{selected_item['code']} - {selected_item['name']}"}
-            user_states[user_id] = {"step": "sweetness", "options": selected_item["options"]}
+            user_choices[user_id] = {
+                "name": user_name,
+                "drink_code": f"{selected_item['code']} - {selected_item['name']}"
+            }
+            user_states[user_id] = {
+                "step": "sweetness",
+                "options": selected_item.get("options", [])
+            }
 
-            if "sweetness" in selected_item["options"]:
+            if "sweetness" in selected_item.get("options", []):
                 keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"sweetness_{opt}")] for opt in OPTIONS["sweetness_levels"]]
                 await query.edit_message_text("🧁 Chọn độ ngọt:", reply_markup=InlineKeyboardMarkup(keyboard))
-            elif "tea" in selected_item["options"]:
+            elif "tea" in selected_item.get("options", []):
                 user_states[user_id]["step"] = "tea"
                 keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"tea_{opt}")] for opt in OPTIONS["tea_strengths"]]
                 await query.edit_message_text("🍵 Chọn độ trà:", reply_markup=InlineKeyboardMarkup(keyboard))
-            elif "topping" in selected_item["options"]:
+            elif "topping" in selected_item.get("options", []):
                 user_states[user_id]["step"] = "topping"
                 keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"topping_{opt}")] for opt in OPTIONS["toppings"]]
                 await query.edit_message_text("🍡 Chọn topping:", reply_markup=InlineKeyboardMarkup(keyboard))
@@ -108,13 +102,13 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 await query.edit_message_text(f"✅ {user_name} đã chọn: {selected_item['code']} - {selected_item['name']}")
         return
 
-    # Xử lý các bước chọn option
     if "_" in data:
         category, value = data.split("_", 1)
         if user_id in user_choices and user_id in user_states:
             user_choices[user_id][category] = value
             next_step = None
             current_options = user_states[user_id]["options"]
+
             if category == "sweetness" and "tea" in current_options:
                 next_step = "tea"
                 keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"tea_{opt}")] for opt in OPTIONS["tea_strengths"]]
@@ -130,7 +124,6 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
             if next_step:
                 user_states[user_id]["step"] = next_step
 
-# /list – Hiển thị danh sách
 async def list_choices_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user_choices:
         await update.message.reply_text("📭 Hiện chưa có ai chọn món.")
@@ -149,13 +142,11 @@ async def list_choices_command(update: Update, context: ContextTypes.DEFAULT_TYP
 
     await update.message.reply_text(response)
 
-# /reset – Xoá tất cả
 async def reset_choices_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_choices.clear()
     user_states.clear()
     await update.message.reply_text("♻️ Danh sách đặt món đã được reset.")
 
-# /export – Xuất Excel
 async def export_choices_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user_choices:
         await update.message.reply_text("📭 Không có dữ liệu để xuất.")
@@ -184,7 +175,6 @@ async def export_choices_command(update: Update, context: ContextTypes.DEFAULT_T
         caption="📄 Danh sách chọn món (Excel)"
     )
 
-# /update – Reload menu và options
 async def update_menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         reload_data()
@@ -192,14 +182,12 @@ async def update_menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     except Exception as e:
         await update.message.reply_text(f"❌ Lỗi khi tải: {str(e)}")
 
-# Gửi nhắc nhở định kỳ
 async def send_monthly_reminder(app):
     await app.bot.send_message(
         chat_id=TARGET_CHAT_ID,
         text="📣 Vui lòng chọn trà/cafe tháng này. Nhập lệnh /menu để xem chi tiết các món."
     )
 
-# Khởi động bot
 if __name__ == '__main__':
     app = ApplicationBuilder().token(TOKEN).build()
 
