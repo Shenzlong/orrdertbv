@@ -77,6 +77,9 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if data.startswith("menu_"):
         menu_code = data.replace("menu_", "")
         if menu_code in MENU_STRUCTURE:
+            # Xóa tin nhắn gốc (chứa danh sách menu SCM, E-Coffee, ...)
+            await query.delete_message()
+            
             items = MENU_STRUCTURE[menu_code]["items"]
             # Nhóm các món theo các note
             grouped_items = []
@@ -91,16 +94,17 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
             if current_group["items"]:
                 grouped_items.append(current_group)
 
-            # Tạo text và keyboard theo nhóm
-            text = f"📋 Danh sách món {MENU_STRUCTURE[menu_code]['name']}:\n"
-            keyboard = []
+            # Gửi tin nhắn theo từng nhóm
             for group in grouped_items:
-                text += f"\n{group['note']}\n"
-                for item in group["items"]:
-                    keyboard.append([InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")])
-
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.edit_message_text(text=text, reply_markup=reply_markup)
+                # Gửi tiêu đề note
+                await query.message.reply_text(f"{group['note']}")
+                # Gửi các nút chọn món
+                keyboard = [
+                    [InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")]
+                    for item in group["items"]
+                ]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                await query.message.reply_text(f"Chọn món:", reply_markup=reply_markup)
         return
 
     if data.startswith("item_"):
@@ -208,7 +212,7 @@ async def export_choices_command(update: Update, context: ContextTypes.DEFAULT_T
         df.to_excel(writer, index=False, sheet_name='Danh sách')
 
     excel_buffer.seek(0)
-    await update.message.reply_document(
+    await update.message.reply_text(
         document=excel_buffer,
         filename="danh_sach_chon_mon.xlsx",
         caption="📄 Danh sách chọn món (Excel)"
