@@ -10,19 +10,13 @@ import io
 import os
 import json
 
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-
 # Biến môi trường
 TOKEN = os.environ.get("BOT_TOKEN")
 TARGET_CHAT_ID = os.environ.get("TARGET_CHAT_ID")
-CREDENTIAL_JSON_CONTENT = os.environ.get("GOOGLE_CREDENTIAL_JSON")
-GOOGLE_SHEET_NAME = "OfficeCafe"
 
 # Tải menu từ file
 MENU_STRUCTURE = {}
 OPTIONS = {}
-
 def load_menu_structure():
     with open("menu.json", "r", encoding="utf-8") as f:
         return json.load(f)
@@ -39,32 +33,8 @@ def reload_data():
 # Gọi khi khởi động
 reload_data()
 
-user_choices = {}
-user_states = {}
-
-def update_google_sheet(user_name, drink_code):
-    try:
-        temp_credential_file = "/tmp/creds.json"
-        with open(temp_credential_file, "w", encoding="utf-8") as f:
-            f.write(CREDENTIAL_JSON_CONTENT)
-
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_name(temp_credential_file, scope)
-        client = gspread.authorize(creds)
-        sheet = client.open(GOOGLE_SHEET_NAME).worksheet("Order")
-
-        records = sheet.get_all_records()
-        found = False
-        for idx, row in enumerate(records, start=2):
-            if row["Tên"] == user_name:
-                sheet.update_cell(idx, 2, drink_code)
-                found = True
-                break
-
-        if not found:
-            sheet.append_row([user_name, drink_code])
-    except Exception as e:
-        print(f"❌ Lỗi khi ghi Google Sheet: {e}")
+user_choices = {}  # {user_id: {name, drink_code, sweetness, tea, topping}}
+user_states = {}   # {user_id: {step, options}}
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👋 Chào mừng bạn với bot đặt trà/cafe!\nGõ: \n /menu để xem danh sách đồ uống.\n /list để xem danh sách các thành viên đã đặt món.\n /reset để xoá danh sách đã chọn món.\n /export để xuất danh sách đã chọn món ra excel.")
@@ -108,13 +78,10 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
                     break
 
         if selected_item:
-            drink_text = f"{selected_item['code']} - {selected_item['name']}"
             user_choices[user_id] = {
                 "name": user_name,
-                "drink_code": drink_text
+                "drink_code": f"{selected_item['code']} - {selected_item['name']}"
             }
-            update_google_sheet(user_name, drink_text)
-
             user_states[user_id] = {
                 "step": "sweetness",
                 "options": selected_item.get("options", [])
@@ -242,4 +209,3 @@ if __name__ == '__main__':
 
     print("Bot đang chạy...")
     app.run_polling()
-    
