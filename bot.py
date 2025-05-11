@@ -73,20 +73,33 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     user_id = query.from_user.id
     user_name = query.from_user.first_name
     print(f"Received callback: {data}, MENU_STRUCTURE: {MENU_STRUCTURE}")  # Debug
+
     if data.startswith("menu_"):
         menu_code = data.replace("menu_", "")
         if menu_code in MENU_STRUCTURE:
             items = MENU_STRUCTURE[menu_code]["items"]
-            # Lọc các mục có code và name
-            menu_items = [item for item in items if "code" in item and "name" in item]
-            notes = [item["text"] for item in items if "type" in item and item["type"] == "note"]
+            # Nhóm các món theo các note
+            grouped_items = []
+            current_group = {"note": "", "items": []}
+            for item in items:
+                if "type" in item and item["type"] == "note":
+                    if current_group["items"]:
+                        grouped_items.append(current_group)
+                    current_group = {"note": item["text"], "items": []}
+                elif "code" in item and "name" in item:
+                    current_group["items"].append(item)
+            if current_group["items"]:
+                grouped_items.append(current_group)
+
+            # Tạo text và keyboard theo nhóm
             text = f"📋 Danh sách món {MENU_STRUCTURE[menu_code]['name']}:\n"
-            if notes:
-                text += "\n".join(notes) + "\n"
-            keyboard = [
-                [InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")]
-                for item in menu_items
-            ]
+            keyboard = []
+            for group in grouped_items:
+                text += f"\n{group['note']}\n"
+                for item in group["items"]:
+                    text += f"{item['code']} - {item['name']}\n"
+                    keyboard.append([InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")])
+
             reply_markup = InlineKeyboardMarkup(keyboard)
             await query.edit_message_text(text=text, reply_markup=reply_markup)
         return
