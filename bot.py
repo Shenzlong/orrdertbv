@@ -97,7 +97,6 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
             for group in grouped_items:
                 text += f"\n{group['note']}\n"
                 for item in group["items"]:
-                    text += f"{item['code']} - {item['name']}\n"
                     keyboard.append([InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")])
 
             reply_markup = InlineKeyboardMarkup(keyboard)
