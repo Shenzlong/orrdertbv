@@ -77,9 +77,6 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if data.startswith("menu_"):
         menu_code = data.replace("menu_", "")
         if menu_code in MENU_STRUCTURE:
-            # Xóa tin nhắn gốc (chứa danh sách menu SCM, E-Coffee, ...)
-            await query.delete_message()
-            
             items = MENU_STRUCTURE[menu_code]["items"]
             # Nhóm các món theo các note
             grouped_items = []
@@ -104,7 +101,7 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
                     for item in group["items"]
                 ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
-                await query.message.reply_text(f"Chọn món:", reply_markup=reply_markup)
+                await query.message.reply_text("Chọn món:", reply_markup=reply_markup)
         return
 
     if data.startswith("item_"):
@@ -212,7 +209,7 @@ async def export_choices_command(update: Update, context: ContextTypes.DEFAULT_T
         df.to_excel(writer, index=False, sheet_name='Danh sách')
 
     excel_buffer.seek(0)
-    await update.message.reply_text(
+    await update.message.reply_document(
         document=excel_buffer,
         filename="danh_sach_chon_mon.xlsx",
         caption="📄 Danh sách chọn món (Excel)"
