@@ -98,6 +98,10 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 user_states[user_id]["step"] = "topping"
                 keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"topping_{opt}")] for opt in OPTIONS["toppings"]]
                 await query.edit_message_text("🍡 Chọn topping:", reply_markup=InlineKeyboardMarkup(keyboard))
+            elif "ice" in selected_item.get("options", []):
+                user_states[user_id]["step"] = "ice"
+                keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"ice_{opt}")] for opt in OPTIONS["ices"]]
+                await query.edit_message_text("🧊 Nóng/Đá:", reply_markup=InlineKeyboardMarkup(keyboard))
             else:
                 await query.edit_message_text(f"✅ {user_name} đã chọn: {selected_item['code']} - {selected_item['name']}")
         return
