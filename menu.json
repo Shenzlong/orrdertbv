@@ -61,7 +61,7 @@
 	  { "code": "edma", "name": "Latte dâu macchiato", "options": [] },
 	  { "code": "ebac", "name": "Bạc xỉu dừa", "options": [] },
 	  { "code": "etgr", "name": "Trà sữa gạo rang", "options": [] },
-	  { "code": "edta", "name": "Trà lài dâu tằm", "options": [] },
+	  { "code": "edta", "name": "Trà lài dâu tằm", "options": [] }
     ]
   }
 }
