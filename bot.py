@@ -14,16 +14,35 @@ import json
 TOKEN = os.environ.get("BOT_TOKEN")
 TARGET_CHAT_ID = os.environ.get("TARGET_CHAT_ID")
 
-# Tải menu từ file
+# Tải menu và options từ file
 MENU_STRUCTURE = {}
 OPTIONS = {}
+
 def load_menu_structure():
-    with open("menu.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open("menu.json", "r", encoding="utf-8") as f:
+            content = f.read()
+            print("Nội dung menu.json:", content)  # Debug
+            return json.load(io.StringIO(content))
+    except json.JSONDecodeError as e:
+        print(f"Lỗi JSON trong menu.json: {e}")
+        raise
+    except FileNotFoundError:
+        print("File menu.json không tìm thấy")
+        raise
 
 def load_options():
-    with open("options.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open("options.json", "r", encoding="utf-8") as f:
+            content = f.read()
+            print("Nội dung options.json:", content)  # Debug
+            return json.load(io.StringIO(content))
+    except json.JSONDecodeError as e:
+        print(f"Lỗi JSON trong options.json: {e}")
+        raise
+    except FileNotFoundError:
+        print("File options.json không tìm thấy")
+        raise
 
 def reload_data():
     global MENU_STRUCTURE, OPTIONS
@@ -53,19 +72,23 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     data = query.data
     user_id = query.from_user.id
     user_name = query.from_user.first_name
-
+    print(f"Received callback: {data}, MENU_STRUCTURE: {MENU_STRUCTURE}")  # Debug
     if data.startswith("menu_"):
         menu_code = data.replace("menu_", "")
         if menu_code in MENU_STRUCTURE:
             items = MENU_STRUCTURE[menu_code]["items"]
+            # Lọc các mục có code và name
+            menu_items = [item for item in items if "code" in item and "name" in item]
+            notes = [item["text"] for item in items if "type" in item and item["type"] == "note"]
+            text = f"📋 Danh sách món {MENU_STRUCTURE[menu_code]['name']}:\n"
+            if notes:
+                text += "\n".join(notes) + "\n"
             keyboard = [
                 [InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")]
-                for item in items
+                for item in menu_items
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.edit_message_text(
-                text=f"📋 Danh sách món {MENU_STRUCTURE[menu_code]['name']}:", reply_markup=reply_markup
-            )
+            await query.edit_message_text(text=text, reply_markup=reply_markup)
         return
 
     if data.startswith("item_"):
@@ -73,7 +96,7 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
         selected_item = None
         for menu in MENU_STRUCTURE.values():
             for item in menu["items"]:
-                if item["code"] == item_code:
+                if "code" in item and item["code"] == item_code:
                     selected_item = item
                     break
 
