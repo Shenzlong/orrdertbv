@@ -14,35 +14,16 @@ import json
 TOKEN = os.environ.get("BOT_TOKEN")
 TARGET_CHAT_ID = os.environ.get("TARGET_CHAT_ID")
 
-# Tải menu và options từ file
+# Tải menu từ file
 MENU_STRUCTURE = {}
 OPTIONS = {}
-
 def load_menu_structure():
-    try:
-        with open("menu.json", "r", encoding="utf-8") as f:
-            content = f.read()
-            print("Nội dung menu.json:", content)  # Debug
-            return json.load(io.StringIO(content))
-    except json.JSONDecodeError as e:
-        print(f"Lỗi JSON trong menu.json: {e}")
-        raise
-    except FileNotFoundError:
-        print("File menu.json không tìm thấy")
-        raise
+    with open("menu.json", "r", encoding="utf-8") as f:
+        return json.load(f)
 
 def load_options():
-    try:
-        with open("options.json", "r", encoding="utf-8") as f:
-            content = f.read()
-            print("Nội dung options.json:", content)  # Debug
-            return json.load(io.StringIO(content))
-    except json.JSONDecodeError as e:
-        print(f"Lỗi JSON trong options.json: {e}")
-        raise
-    except FileNotFoundError:
-        print("File options.json không tìm thấy")
-        raise
+    with open("options.json", "r", encoding="utf-8") as f:
+        return json.load(f)
 
 def reload_data():
     global MENU_STRUCTURE, OPTIONS
@@ -72,36 +53,19 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     data = query.data
     user_id = query.from_user.id
     user_name = query.from_user.first_name
-    print(f"Received callback: {data}, MENU_STRUCTURE: {MENU_STRUCTURE}")  # Debug
 
     if data.startswith("menu_"):
         menu_code = data.replace("menu_", "")
         if menu_code in MENU_STRUCTURE:
             items = MENU_STRUCTURE[menu_code]["items"]
-            # Nhóm các món theo các note
-            grouped_items = []
-            current_group = {"note": "", "items": []}
-            for item in items:
-                if "type" in item and item["type"] == "note":
-                    if current_group["items"]:
-                        grouped_items.append(current_group)
-                    current_group = {"note": item["text"], "items": []}
-                elif "code" in item and "name" in item:
-                    current_group["items"].append(item)
-            if current_group["items"]:
-                grouped_items.append(current_group)
-
-            # Gửi tin nhắn theo từng nhóm
-            for group in grouped_items:
-                # Gửi tiêu đề note
-                await query.message.reply_text(f"{group['note']}")
-                # Gửi các nút chọn món
-                keyboard = [
-                    [InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")]
-                    for item in group["items"]
-                ]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                await query.message.reply_text("Chọn món:", reply_markup=reply_markup)
+            keyboard = [
+                [InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")]
+                for item in items
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.edit_message_text(
+                text=f"📋 Danh sách món {MENU_STRUCTURE[menu_code]['name']}:", reply_markup=reply_markup
+            )
         return
 
     if data.startswith("item_"):
@@ -109,7 +73,7 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
         selected_item = None
         for menu in MENU_STRUCTURE.values():
             for item in menu["items"]:
-                if "code" in item and item["code"] == item_code:
+                if item["code"] == item_code:
                     selected_item = item
                     break
 
@@ -134,10 +98,6 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 user_states[user_id]["step"] = "topping"
                 keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"topping_{opt}")] for opt in OPTIONS["toppings"]]
                 await query.edit_message_text("🍡 Chọn topping:", reply_markup=InlineKeyboardMarkup(keyboard))
-            elif "ice" in selected_item.get("options", []):
-                user_states[user_id]["step"] = "ice"
-                keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"ice_{opt}")] for opt in OPTIONS["ices"]]
-                await query.edit_message_text("🧊 Nóng/Đá:", reply_markup=InlineKeyboardMarkup(keyboard))
             else:
                 await query.edit_message_text(f"✅ {user_name} đã chọn: {selected_item['code']} - {selected_item['name']}")
         return
