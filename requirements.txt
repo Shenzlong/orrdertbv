@@ -3,7 +3,7 @@ apscheduler
 pandas
 openpyxl
 gspread
-google-auth
+oauth2client
 
 
 
