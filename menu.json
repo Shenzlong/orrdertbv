@@ -2,6 +2,7 @@
   "scm": {
     "name": "SCM Office",
     "items": [
+      { "type": "note", "text": "cup - Paper cup (1 case/10 pcs) " },
       { "code": "cup", "name": "Paper cup (1 case/10 pcs)", "options": [] },
       { "code": "vina", "name": "Vinacafe (24 gói/ bịch)", "options": [] },
       { "code": "net", "name": "Netcafe (18 gói/ hộp)", "options": [] },
