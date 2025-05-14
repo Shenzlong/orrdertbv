@@ -10,19 +10,13 @@ import io
 import os
 import json
 
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-
 # Biến môi trường
 TOKEN = os.environ.get("BOT_TOKEN")
 TARGET_CHAT_ID = os.environ.get("TARGET_CHAT_ID")
-CREDENTIAL_JSON_CONTENT = os.environ.get("GOOGLE_CREDENTIAL_JSON")
-GOOGLE_SHEET_NAME = "OfficeCafe"
 
 # Tải menu từ file
 MENU_STRUCTURE = {}
 OPTIONS = {}
-
 def load_menu_structure():
     with open("menu.json", "r", encoding="utf-8") as f:
         return json.load(f)
@@ -39,32 +33,8 @@ def reload_data():
 # Gọi khi khởi động
 reload_data()
 
-user_choices = {}
-user_states = {}
-
-def update_google_sheet(user_name, drink_code):
-    try:
-        temp_credential_file = "/tmp/creds.json"
-        with open(temp_credential_file, "w", encoding="utf-8") as f:
-            f.write(CREDENTIAL_JSON_CONTENT)
-
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_name(temp_credential_file, scope)
-        client = gspread.authorize(creds)
-        sheet = client.open(GOOGLE_SHEET_NAME).worksheet("Order")
-
-        records = sheet.get_all_records()
-        found = False
-        for idx, row in enumerate(records, start=2):
-            if row["Tên"] == user_name:
-                sheet.update_cell(idx, 2, drink_code)
-                found = True
-                break
-
-        if not found:
-            sheet.append_row([user_name, drink_code])
-    except Exception as e:
-        print(f"❌ Lỗi khi ghi Google Sheet: {e}")
+user_choices = {}  # {user_id: {name, drink_code, sweetness, tea, topping}}
+user_states = {}   # {user_id: {step, options}}
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👋 Chào mừng bạn với bot đặt trà/cafe!\nGõ: \n /menu để xem danh sách đồ uống.\n /list để xem danh sách các thành viên đã đặt món.\n /reset để xoá danh sách đã chọn món.\n /export để xuất danh sách đã chọn món ra excel.")
@@ -88,24 +58,14 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
         menu_code = data.replace("menu_", "")
         if menu_code in MENU_STRUCTURE:
             items = MENU_STRUCTURE[menu_code]["items"]
-
-            keyboard = []
-            text = f"📋 Danh sách món {MENU_STRUCTURE[menu_code]['name']}:\n\n"
-
-            for item in items:
-                if item.get("type") == "note":
-                    text += f"📝 {item.get('text', '')}\n"
-                else:
-                    text += f"🔹 {item['code']} - {item['name']}\n"
-                    keyboard.append([
-                        InlineKeyboardButton(
-                            text=f"{item['code']} - {item['name']}",
-                            callback_data=f"item_{item['code']}"
-                        )
-                    ])
-
+            keyboard = [
+                [InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")]
+                for item in items
+            ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.edit_message_text(text=text, reply_markup=reply_markup)
+            await query.edit_message_text(
+                text=f"📋 Danh sách món {MENU_STRUCTURE[menu_code]['name']}:", reply_markup=reply_markup
+            )
         return
 
     if data.startswith("item_"):
@@ -113,20 +73,15 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
         selected_item = None
         for menu in MENU_STRUCTURE.values():
             for item in menu["items"]:
-                if item.get("type") != "note" and item["code"] == item_code:
+                if item["code"] == item_code:
                     selected_item = item
                     break
-            if selected_item:
-                break
 
         if selected_item:
-            drink_text = f"{selected_item['code']} - {selected_item['name']}"
             user_choices[user_id] = {
                 "name": user_name,
-                "drink_code": drink_text
+                "drink_code": f"{selected_item['code']} - {selected_item['name']}"
             }
-            update_google_sheet(user_name, drink_text)
-
             user_states[user_id] = {
                 "step": "sweetness",
                 "options": selected_item.get("options", [])
@@ -166,6 +121,10 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 next_step = "topping"
                 keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"topping_{opt}")] for opt in OPTIONS["toppings"]]
                 await query.edit_message_text("🍡 Chọn topping:", reply_markup=InlineKeyboardMarkup(keyboard))
+            elif category == "tea" and "ice" in current_options:
+                next_step = "ice"
+                keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"topping_{opt}")] for opt in OPTIONS["toppings"]]
+                await query.edit_message_text("🧊 Nóng/Đá:", reply_markup=InlineKeyboardMarkup(keyboard))
             else:
                 await query.edit_message_text(f"✅ {user_choices[user_id]['name']} đã hoàn tất đặt món.")
                 user_states.pop(user_id, None)
@@ -187,6 +146,8 @@ async def list_choices_command(update: Update, context: ContextTypes.DEFAULT_TYP
             detail += f" | Trà: {data['tea']}"
         if "topping" in data:
             detail += f" | Topping: {data['topping']}"
+        if "ice" in data:
+            detail += f" | Topping: {data['ice']}"
         response += f"- {data['name']}: {detail}\n"
 
     await update.message.reply_text(response)
@@ -208,7 +169,8 @@ async def export_choices_command(update: Update, context: ContextTypes.DEFAULT_T
             "Món": d["drink_code"],
             "Độ ngọt": d.get("sweetness", ""),
             "Độ trà": d.get("tea", ""),
-            "Topping": d.get("topping", "")
+            "Topping": d.get("topping", ""),
+            "Nóng/Đá": d.get("ice", ""),
         }
         data.append(entry)
 
