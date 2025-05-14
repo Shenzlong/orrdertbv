@@ -9,6 +9,7 @@ import pandas as pd
 import io
 import os
 import json
+from collections import defaultdict
 
 # Biến môi trường
 TOKEN = os.environ.get("BOT_TOKEN")
@@ -54,14 +55,26 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     user_id = query.from_user.id
     user_name = query.from_user.first_name
 
+    if data == "ignore":
+        return
+
     if data.startswith("menu_"):
         menu_code = data.replace("menu_", "")
         if menu_code in MENU_STRUCTURE:
             items = MENU_STRUCTURE[menu_code]["items"]
-            keyboard = [
-                [InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")]
-                for item in items
-            ]
+            grouped_items = defaultdict(list)
+            for item in items:
+                group = item.get("group", "Khác")
+                grouped_items[group].append(item)
+
+            keyboard = []
+            for group_name, group_items in grouped_items.items():
+                keyboard.append([InlineKeyboardButton(text=f"📂 {group_name}", callback_data="ignore")])
+                for item in group_items:
+                    keyboard.append([
+                        InlineKeyboardButton(text=f"{item['code']} - {item['name']}", callback_data=f"item_{item['code']}")
+                    ])
+
             reply_markup = InlineKeyboardMarkup(keyboard)
             await query.edit_message_text(
                 text=f"📋 Danh sách món {MENU_STRUCTURE[menu_code]['name']}:", reply_markup=reply_markup
@@ -121,9 +134,9 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 next_step = "topping"
                 keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"topping_{opt}")] for opt in OPTIONS["toppings"]]
                 await query.edit_message_text("🍡 Chọn topping:", reply_markup=InlineKeyboardMarkup(keyboard))
-            elif category == "tea" and "ice" in current_options:
+            elif category == "topping" and "ice" in current_options:
                 next_step = "ice"
-                keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"topping_{opt}")] for opt in OPTIONS["toppings"]]
+                keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"ice_{opt}")] for opt in OPTIONS["ices"]]
                 await query.edit_message_text("🧊 Nóng/Đá:", reply_markup=InlineKeyboardMarkup(keyboard))
             else:
                 await query.edit_message_text(f"✅ {user_choices[user_id]['name']} đã hoàn tất đặt món.")
@@ -170,7 +183,7 @@ async def export_choices_command(update: Update, context: ContextTypes.DEFAULT_T
             "Độ ngọt": d.get("sweetness", ""),
             "Độ trà": d.get("tea", ""),
             "Topping": d.get("topping", ""),
-            "Nóng/Đá": d.get("ice", ""),
+            "Nóng/Đá": d.get("ice", "")
         }
         data.append(entry)
 

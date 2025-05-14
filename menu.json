@@ -1,63 +1,31 @@
 {
-  "scm": {
-    "name": "SCM Office",
+  "highland": {
+    "name": "Highland",
     "items": [
-      { "code": "cup", "name": "Paper cup (1 case/10 pcs)" },
-      { "code": "vina", "name": "Vinacafe (24 gói/ bịch)", "options": [] },
-      { "code": "net", "name": "Netcafe (18 gói/ hộp)", "options": [] },
-      { "code": "leg", "name": "Legend (12 gói/ hộp)", "options": [] },
-      { "code": "g7", "name": "G7 (21 gói/ hộp)", "options": [] },
-      { "code": "bg7", "name": "Black G7 (15 gói/ hộp)", "options": [] },
-      { "code": "bviet", "name": "Black Cafe Việt (35 gói/ bịch)", "options": [] },
-      { "code": "gin", "name": "Ginger Tea", "options": [] },
-      { "code": "lip", "name": "Lipton ice tea", "options": [] },
-      { "code": "blip", "name": "Black lipton tea", "options": [] },
-      { "code": "atis", "name": "Atiso tea", "options": [] },
-      { "code": "mat", "name": "Matcha tea", "options": [] },
-      { "code": "royal", "name": "Royal milk tea Vàng", "options": [] },
-      { "code": "milo", "name": "Milo (10 gói/ dây)", "options": [] },
-      { "code": "phin", "name": "Cà phê phin (500gr/ hộp)", "options": [] }
-    ]
-  },
-  "ecoffee": {
-    "name": "E-Coffee",
-    "items": [
-      { "code": "ecf1", "name": "Cà phê năng lượng đen nóng", "options": ["ice"] },
-      { "code": "ecf2", "name": "Cafe năng lượng sữa đá", "options": [] },
-      { "code": "ecf3", "name": "Cafe năng lượng sữa nóng", "options": [] },
-      { "code": "ebxd", "name": "Bạc xỉu đá", "options": [] },
-	  { "code": "elat", "name": "Latte đá", "options": [] },
-	  { "code": "ecap", "name": "Cappuccino đá", "options": [] },
-	  { "code": "efyn", "name": "Americano nóng", "options": [] },
-	  { "code": "etlt", "name": "Latte", "options": [] },
-	  { "code": "eesp", "name": "Espresso", "options": [] },
-	  { "code": "ehts", "name": "Hồng trà sữa", "options": [] },
-	  { "code": "eolo", "name": "Trà oloong sữa", "options": [] },
-	  { "code": "ecam", "name": "Cam vắt", "options": [] },
-	  { "code": "emac", "name": "Trà lài macchiato", "options": [] },
-	  { "code": "elvq", "name": "Trà lài việt quất", "options": [] },
-	  { "code": "etmo", "name": "Trà thảo mộc mật ong", "options": [] },
-	  { "code": "elcd", "name": "Trà lài cam dâu", "options": [] },
-	  { "code": "estd", "name": "Sữa tươi trân châu đường đen", "options": [] },
-	  { "code": "edhc", "name": "Trà đào hạt chia", "options": [] },
-	  { "code": "etis", "name": "Trà atiso đỏ hạt chia", "options": [] },
-	  { "code": "edbc", "name": "Trà Hoa đậu biết hạt chia", "options": [] },
-	  { "code": "ecsg", "name": "Nước chanh sả gừng hạt chia", "options": [] },
-	  { "code": "ecmo", "name": "Chanh muối mật ong", "options": [] },
-	  { "code": "ehac", "name": "Nước ép dưa hấu hạt chia", "options": [] },
-	  { "code": "edtc", "name": "Nước ép dưa/thơm hạt chia", "options": [] },
-	  { "code": "eccn", "name": "Cacao sữa nóng", "options": [] },
-	  { "code": "ehbv", "name": "Hibicus vải", "options": [] },
-	  { "code": "emct", "name": "Mocktail trái cây", "options": [] },
-	  { "code": "etrv", "name": "Trà vải", "options": [] },
-	  { "code": "epbt", "name": "Trà phúc bồn tử", "options": [] },
-	  { "code": "emla", "name": "Matcha latte", "options": [] },
-	  { "code": "eldt", "name": "Trà lài đác thơm", "options": [] },
-	  { "code": "edma", "name": "Latte dâu macchiato", "options": [] },
-	  { "code": "ebac", "name": "Bạc xỉu dừa", "options": [] },
-	  { "code": "etgr", "name": "Trà sữa gạo rang", "options": [] },
-	  { "code": "edta", "name": "Trà lài dâu tằm", "options": [] }
+      {
+        "group": "Các dòng cafe năng lượng",
+        "code": "CF1",
+        "name": "Cafe sữa đá",
+        "options": ["sweetness", "ice"]
+      },
+      {
+        "group": "Các dòng cafe năng lượng",
+        "code": "CF2",
+        "name": "Bạc xỉu",
+        "options": ["sweetness", "ice"]
+      },
+      {
+        "group": "Trà sữa truyền thống",
+        "code": "TS1",
+        "name": "Trà sữa truyền thống",
+        "options": ["sweetness", "tea", "topping", "ice"]
+      },
+      {
+        "group": "Trà trái cây",
+        "code": "TF1",
+        "name": "Trà đào cam sả",
+        "options": ["sweetness", "ice"]
+      }
     ]
   }
 }
-
