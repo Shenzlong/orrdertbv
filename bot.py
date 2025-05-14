@@ -147,7 +147,7 @@ async def list_choices_command(update: Update, context: ContextTypes.DEFAULT_TYP
         if "topping" in data:
             detail += f" | Topping: {data['topping']}"
         if "ice" in data:
-            detail += f" | Topping: {data['ice']}"
+            detail += f" | Nóng/Đá: {data['ice']}"
         response += f"- {data['name']}: {detail}\n"
 
     await update.message.reply_text(response)
