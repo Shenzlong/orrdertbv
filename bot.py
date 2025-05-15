@@ -279,7 +279,7 @@ async def export_choices_command(update: Update, context: ContextTypes.DEFAULT_T
             "Độ ngọt": d.get("sweetness", ""),
             "Độ trà": d.get("tea", ""),
             "Topping": d.get("topping", ""),
-            "Nóng/Đá": d.get("ice", "")
+            "Nóng/Đá": d.get("ice", ""),
             "Size": d.get("size", "")
         }
         data.append(entry)
