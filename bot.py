@@ -57,7 +57,7 @@ def save_to_google_sheets(data):
         found = False
         for idx, record in enumerate(all_records, start=2):  # start=2 vì dòng 1 là tiêu đề
             if record.get("Tên", "").strip() == name:
-                worksheet.update(f'A{idx}:G{idx}', [[
+                worksheet.update(f'A{idx}:H{idx}', [[
                     data.get("name", ""),
                     data.get("drink_code", ""),
                     data.get("sweetness", ""),
