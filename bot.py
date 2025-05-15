@@ -219,10 +219,39 @@ async def list_choices_command(update: Update, context: ContextTypes.DEFAULT_TYP
     await update.message.reply_text(response)
 
 # Lệnh /reset
+# Lệnh /reset
 async def reset_choices_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_choices.clear()
     user_states.clear()
-    await update.message.reply_text("♻️ Danh sách đặt món đã được reset.")
+
+    try:
+        # Kết nối Google Sheets
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds_dict = json.loads(os.environ.get("CREDENTIAL_JSON_CONTENT"))
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        client = gspread.authorize(creds)
+
+        sheet_url = "https://docs.google.com/spreadsheets/d/1FP-6syh0tBAf4Bdx4wzM9w9ENP9iSukMI_8Cwll2nLE"
+        spreadsheet = client.open_by_url(sheet_url)
+        worksheet = spreadsheet.worksheet("Bot")
+
+        # Lấy tất cả giá trị
+        data = worksheet.get_all_values()
+        if len(data) <= 1:
+            await update.message.reply_text("♻️ Danh sách trên Google Sheets đã trống hoặc chỉ có tiêu đề.")
+            return
+
+        # Xoá nội dung từ dòng 2 trở đi, trừ cột "Tên"
+        for row_index in range(2, len(data)+1):
+            worksheet.batch_update([{
+                "range": f"B{row_index}:G{row_index}",  # Xoá từ cột B đến G (giữ cột A là "Tên")
+                "values": [[""] * (len(data[0]) - 1)]
+            }])
+
+        await update.message.reply_text("♻️ Danh sách đã được reset cả trong bot và Google Sheets (giữ lại cột 'Tên').")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Lỗi khi xoá dữ liệu Google Sheets: {str(e)}")
+
 
 # Lệnh /export
 async def export_choices_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
