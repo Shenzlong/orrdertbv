@@ -51,20 +51,39 @@ def save_to_google_sheets(data):
         spreadsheet = client.open_by_url(sheet_url)
         worksheet = spreadsheet.worksheet("Bot")
 
-        row = [
-            data.get("name", ""),
-            data.get("drink_code", ""),
-            data.get("sweetness", ""),
-            data.get("tea", ""),
-            data.get("topping", ""),
-            data.get("ice", ""),
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        ]
+        name = data.get("name", "").strip()
+        all_records = worksheet.get_all_records()
 
-        worksheet.append_row(row)
-        print("✅ Đã lưu vào Google Sheets.")
+        found = False
+        for idx, record in enumerate(all_records, start=2):  # start=2 vì dòng 1 là tiêu đề
+            if record.get("Tên", "").strip() == name:
+                worksheet.update(f'A{idx}:G{idx}', [[
+                    data.get("name", ""),
+                    data.get("drink_code", ""),
+                    data.get("sweetness", ""),
+                    data.get("tea", ""),
+                    data.get("topping", ""),
+                    data.get("ice", ""),
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                ]])
+                found = True
+                break
+
+        if not found:
+            worksheet.append_row([
+                data.get("name", ""),
+                data.get("drink_code", ""),
+                data.get("sweetness", ""),
+                data.get("tea", ""),
+                data.get("topping", ""),
+                data.get("ice", ""),
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ])
+
+        print("✅ Đã ghi dữ liệu vào Google Sheets.")
     except Exception as e:
-        print("❌ Lỗi khi lưu Google Sheets:", e)
+        print("❌ Lỗi khi ghi Google Sheets:", e)
+
 
 # Lệnh khởi động
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
