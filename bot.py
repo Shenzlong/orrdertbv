@@ -36,7 +36,7 @@ def reload_data():
 
 reload_data()
 
-user_choices = {}  # {user_id: {name, drink_code, sweetness, tea, topping}}
+user_choices = {}  # {user_id: {name, drink_code, sweetness, tea, topping, size}}
 user_states = {}   # {user_id: {step, options}}
 
 # Lưu vào Google Sheets
@@ -64,6 +64,7 @@ def save_to_google_sheets(data):
                     data.get("tea", ""),
                     data.get("topping", ""),
                     data.get("ice", ""),
+                    data.get("size", ""),
                     datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 ]])
                 found = True
@@ -77,6 +78,7 @@ def save_to_google_sheets(data):
                 data.get("tea", ""),
                 data.get("topping", ""),
                 data.get("ice", ""),
+                data.get("size", ""),
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ])
 
@@ -166,6 +168,10 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 user_states[user_id]["step"] = "ice"
                 keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"ice_{opt}")] for opt in OPTIONS["ices"]]
                 await query.edit_message_text("🧊 Nóng/Đá:", reply_markup=InlineKeyboardMarkup(keyboard))
+            elif "size" in selected_item.get("options", []):
+                user_states[user_id]["step"] = "size"
+                keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"size_{opt}")] for opt in OPTIONS["sizes"]]
+                await query.edit_message_text("👝 Size:", reply_markup=InlineKeyboardMarkup(keyboard))
             else:
                 await query.edit_message_text(f"✅ {user_name} đã chọn: {selected_item['code']} - {selected_item['name']}")
         return
@@ -189,6 +195,10 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 next_step = "ice"
                 keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"ice_{opt}")] for opt in OPTIONS["ices"]]
                 await query.edit_message_text("🧊 Nóng/Đá:", reply_markup=InlineKeyboardMarkup(keyboard))
+            elif category == "ice" and "size" in current_options:
+                next_step = "size"
+                keyboard = [[InlineKeyboardButton(text=opt, callback_data=f"size_{opt}")] for opt in OPTIONS["sizes"]]
+                await query.edit_message_text("👝 Size:", reply_markup=InlineKeyboardMarkup(keyboard))
             else:
                 await query.edit_message_text(f"✅ {user_choices[user_id]['name']} đã hoàn tất đặt món.")
                 save_to_google_sheets(user_choices[user_id])
@@ -214,6 +224,8 @@ async def list_choices_command(update: Update, context: ContextTypes.DEFAULT_TYP
             detail += f" | Topping: {data['topping']}"
         if "ice" in data:
             detail += f" | Nóng/Đá: {data['ice']}"
+        if "size" in data:
+            detail += f" | Size: {data['size']}"
         response += f"- {data['name']}: {detail}\n"
 
     await update.message.reply_text(response)
@@ -244,11 +256,11 @@ async def reset_choices_command(update: Update, context: ContextTypes.DEFAULT_TY
         # Xoá nội dung từ dòng 2 trở đi, trừ cột "Tên"
         for row_index in range(2, len(data)+1):
             worksheet.batch_update([{
-                "range": f"B{row_index}:G{row_index}",  # Xoá từ cột B đến G (giữ cột A là "Tên")
+                "range": f"B{row_index}:H{row_index}",  # Xoá từ cột B đến H (giữ cột A là "Tên")
                 "values": [[""] * (len(data[0]) - 1)]
             }])
 
-        await update.message.reply_text("♻️ Danh sách đã được reset cả trong bot và Google Sheets (giữ lại cột 'Tên').")
+        await update.message.reply_text("♻️ Danh sách đã được xoá.")
     except Exception as e:
         await update.message.reply_text(f"❌ Lỗi khi xoá dữ liệu Google Sheets: {str(e)}")
 
@@ -268,6 +280,7 @@ async def export_choices_command(update: Update, context: ContextTypes.DEFAULT_T
             "Độ trà": d.get("tea", ""),
             "Topping": d.get("topping", ""),
             "Nóng/Đá": d.get("ice", "")
+            "Size": d.get("size", "")
         }
         data.append(entry)
 

@@ -18,7 +18,7 @@
         "group": "Trà sữa truyền thống",
         "code": "TS1",
         "name": "Trà sữa truyền thống",
-        "options": ["sweetness", "tea", "topping", "ice"]
+        "options": ["sweetness", "tea", "topping", "ice", "size"]
       },
       {
         "group": "Trà trái cây",
