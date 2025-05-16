@@ -21,6 +21,13 @@ TARGET_CHAT_ID = os.environ.get("TARGET_CHAT_ID")
 MENU_STRUCTURE = {}
 OPTIONS = {}
 
+def load_options_by_menu(menu_code):
+    path = f"options_{menu_code}.json"
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+    
 def load_menu_structure():
     with open("menu.json", "r", encoding="utf-8") as f:
         return json.load(f)
@@ -114,6 +121,10 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if data.startswith("menu_"):
         menu_code = data.replace("menu_", "")
         if menu_code in MENU_STRUCTURE:
+            context.user_data["current_menu_code"] = menu_code  # Lưu lại menu đang chọn
+            global OPTIONS
+            OPTIONS = load_options_by_menu(menu_code)  # Load options tương ứng
+
             items = MENU_STRUCTURE[menu_code]["items"]
             grouped_items = defaultdict(list)
             for item in items:
