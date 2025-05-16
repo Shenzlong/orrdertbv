@@ -174,6 +174,8 @@ async def handle_menu_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 await query.edit_message_text("👝 Size:", reply_markup=InlineKeyboardMarkup(keyboard))
             else:
                 await query.edit_message_text(f"✅ {user_name} đã chọn: {selected_item['code']} - {selected_item['name']}")
+                save_to_google_sheets(user_choices[user_id])
+                user_states.pop(user_id, None)
         return
 
     if "_" in data:
