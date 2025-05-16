@@ -1,31 +1,283 @@
 {
-  "highland": {
-    "name": "Highland",
+  "scm": {
+    "name": "SCM Office",
+    "items": [
+      { 
+		"code": "S01", 
+		"name": "Paper cup (1 case/10 pcs)" 
+	  },
+      { 
+		"code": "S02", 
+		"name": "Vinacafe (24 gói/ bịch)"
+	  },
+      { 
+		"code": "S03", 
+		"name": "Netcafe (18 gói/ hộp)"
+	  },
+      { 
+		"code": "S04", 
+		"name": "Legend (12 gói/ hộp)"
+	  },
+      { 
+		"code": "S05", 
+		"name": "G7 (21 gói/ hộp)"
+	  },
+      { 
+		"code": "S06",
+		"name": "Black G7 (15 gói/ hộp)"
+	  },
+      { 
+		"code": "S07",
+		"name": "Black Cafe Việt (35 gói/ bịch)"
+	  },
+      {
+		"code": "S08",
+		"name": "Ginger Tea"
+	  },
+      {
+		"code": "S09",
+		"name": "Lipton ice tea"
+	  },
+      { 
+		"code": "S10",
+		"name": "Black lipton tea"
+	  },
+      {
+		"code": "S11",
+		"name": "Atiso tea"
+	  },
+      {
+		"code": "S12",
+		"name": "Matcha tea"
+	  },
+      { 
+		"code": "S13",
+		"name": "Royal milk tea Vàng"
+	  },
+      {
+		"code": "S14",
+		"name": "Milo (10 gói/ dây)"
+	  },
+      {
+		"code": "S15",
+		"name": "Cà phê phin (500gr/ hộp)"
+	  }
+    ]
+  },
+{
+  "ecoffee": {
+    "name": "E-Coffee",
     "items": [
       {
-        "group": "Các dòng cafe năng lượng",
-        "code": "CF1",
-        "name": "Cafe sữa đá",
-        "options": ["sweetness", "ice"]
-      },
+		"group": "Cafe năng lượng",
+		"code": "E01",
+		"name": "Cà phê năng lượng đen nóng",
+		"options": [] 
+	  },
       {
-        "group": "Các dòng cafe năng lượng",
-        "code": "CF2",
-        "name": "Bạc xỉu",
-        "options": ["sweetness", "ice"]
-      },
+		"group": "Cafe năng lượng",
+		"code": "E02",
+		"name": "Cafe năng lượng sữa",
+		"options": ["ice"]
+	  },
       {
-        "group": "Trà sữa truyền thống",
-        "code": "TS1",
-        "name": "Trà sữa truyền thống",
-        "options": ["sweetness", "tea", "topping", "ice", "size"]
-      },
-      {
-        "group": "Trà trái cây",
-        "code": "TF1",
-        "name": "Trà đào cam sả",
-        "options": ["sweetness", "ice"]
-      }
+		"group": "Cafe năng lượng",
+		"code": "E03",
+		"name": "Bạc xỉu đá",
+		"options": []
+	  },
+	  {
+		"group": "Cafe năng lượng",
+	    "code": "E04",
+		"name": "Latte đá",
+		"options": []
+	  },
+	  {
+		"group": "Cafe năng lượng",
+		"code": "E05",
+		"name": "Cappuccino đá",
+		"options": []
+	  },
+	  {
+		"group": "Cafe Ý",
+		"code": "E06",
+		"name": "Americano",
+		"options": ["ice"]
+	  },
+	  {
+		"group": "Cafe Ý",
+		"code": "E07",
+		"name": "Mocha",
+		"options": []
+	  },
+	  { 
+		"group": "Cafe Ý",
+		"code": "E08",
+		"name": "Espresso",
+		"options": []
+	  },
+	  {
+		"group": "Thức uống khác",
+		"code": "E09",
+		"name": "Hồng trà sữa",
+		"options": []
+	  },
+	  {
+		"group": "Thức uống khác",  
+		"code": "E10",
+		"name": "Trà oloong sữa",
+		"options": []
+	  },
+	  { 
+		"group": "Thức uống khác",
+		"code": "E11",
+		"name": "Cam vắt",
+		"options": []
+	  },
+	  {
+		"group": "Thức uống khác",
+		"code": "E12",
+		"name": "Trà lài macchiato",
+		"options": []
+	  },
+	  {
+		"group": "Thức uống khác",
+		"code": "E13",
+		"name": "Trà lài việt quất",
+		"options": []
+	  },
+	  {
+		"group": "Thức uống khác",
+		"code": "E14",
+		"name": "Trà thảo mộc mật ong",
+		"options": []
+	  },
+	  {
+		"group": "Thức uống khác",
+		"code": "E15",
+		"name": "Trà lài cam dâu",
+		"options": []
+	  },
+	  {
+		"group": "Thức uống khác",
+		"code": "E16",
+		"name": "Sữa tươi trân châu đường đen",
+		"options": []
+	  },
+	  {
+		"group": "Thức uống khác",
+		"code": "E17",
+		"name": "Cacao sữa nóng",
+		"options": []
+	  },
+	  {
+		"group": "Thức uống khác",
+		"code": "E18",
+		"name": "Hibicus vải",
+		"options": []
+	  },
+	  {
+		"group": "Thức uống khác",
+		"code": "E19",
+		"name": "Trà vải hoa hồng",
+		"options": []
+	  },
+	  { 
+		"group": "Thức uống khác",
+		"code": "E20",
+		"name": "Mocktail trái cây",
+		"options": []
+	  },
+	  { 
+		"group": "Thức uống khác",
+		"code": "E21",
+		"name": "Trà vải",
+		"options": []
+	  },
+	  { 
+		"group": "Thức uống khác",
+		"code": "E22",
+		"name": "Trà phúc bồn tử",
+		"options": []
+	  },
+	  { 
+		"group": "Thức uống khác",
+		"code": "E23",
+		"name": "Matcha latte",
+		"options": []
+	  },
+	  { 
+		"group": "Thức uống khác",
+		"code": "E24",
+		"name": "Trà lài đác thơm",
+		"options": []
+	  },
+	  { 
+		"group": "Thức uống khác",
+		"code": "E25",
+		"name": "Latte dâu macchiato",
+		"options": []
+	  },
+	  { 
+		"group": "Thức uống khác",
+		"code": "E26",
+		"name": "Bạc xỉu dừa",
+		"options": []
+	  },
+	  { 
+		"group": "Thức uống khác",
+		"code": "E27",
+		"name": "Trà sữa gạo rang",
+		"options": []
+	  },
+	  { 
+		"group": "Thức uống khác",
+		"code": "E28",
+		"name": "Trà lài dâu tằm",
+		"options": []
+	  },
+	  {
+		"group": "Thanh nhiệt",
+		"code": "E29",
+		"name": "Trà đào hạt chia",
+		"options": []
+	  },
+	  {
+		"group": "Thanh nhiệt",
+		"code": "E30",
+		"name": "Trà atiso đỏ hạt chia",
+		"options": []
+	  },
+	  {
+		"group": "Thanh nhiệt",
+		"code": "E31",
+		"name": "Trà Hoa đậu biết hạt chia",
+		"options": []
+	  },
+	  {
+		"group": "Thanh nhiệt",
+		"code": "E32",
+		"name": "Nước chanh sả gừng hạt chia",
+		"options": []
+	  },
+	  {
+		"group": "Thanh nhiệt",
+		"code": "E33",
+		"name": "Chanh muối mật ong",
+		"options": []
+	  },
+	  {
+		"group": "Thanh nhiệt",
+		"code": "E34",
+		"name": "Nước ép dưa hấu hạt chia",
+		"options": []
+	  },
+	  {
+		"group": "Thanh nhiệt",
+		"code": "E35",
+		"name": "Nước ép dưa/thơm hạt chia",
+		"options": []
+	  }
     ]
   }
 }
