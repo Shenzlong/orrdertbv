@@ -56,8 +56,10 @@ def save_to_google_sheets(data):
 
         sheet_url = "https://docs.google.com/spreadsheets/d/1FP-6syh0tBAf4Bdx4wzM9w9ENP9iSukMI_8Cwll2nLE"
         spreadsheet = client.open_by_url(sheet_url)
+        
         worksheet = spreadsheet.worksheet("Bot")
-
+        worksheet_group = spreadsheet.worksheet("Group")
+        
         name = data.get("name", "").strip()
         all_records = worksheet.get_all_records()
 
@@ -88,12 +90,40 @@ def save_to_google_sheets(data):
                 data.get("size", ""),
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ])
-
+            
+# Ghi dữ liệu vào sheet Group            
+            worksheet_group.append_row([
+            data.get("name", ""),
+            data.get("drink_code", ""),
+            data.get("sweetness", ""),
+            data.get("tea", ""),
+            data.get("topping", ""),
+            data.get("ice", ""),
+            data.get("size", ""),
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ])
+            
         print("✅ Đã ghi dữ liệu vào Google Sheets.")
     except Exception as e:
         print("❌ Lỗi khi ghi Google Sheets:", e)
 
+# Xoá nội dunng trong sheet Group
+async def clear_group_sheet():
+    try:
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds_dict = json.loads(os.environ.get("CREDENTIAL_JSON_CONTENT"))
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        client = gspread.authorize(creds)
 
+        sheet_url = "https://docs.google.com/spreadsheets/d/1FP-6syh0tBAf4Bdx4wzM9w9ENP9iSukMI_8Cwll2nLE"
+        spreadsheet = client.open_by_url(sheet_url)
+        worksheet = spreadsheet.worksheet("Group")
+
+        worksheet.resize(rows=1)
+        print("🗑️ Đã xoá dữ liệu sheet Group giữ lại tiêu đề.")
+    except Exception as e:
+        print("❌ Lỗi khi xoá dữ liệu Group:", e)
+        
 # Lệnh khởi động
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👋 Chào mừng bạn với bot đặt trà/cafe!\nGõ: \n /menu để xem danh sách đồ uống.\n /list để xem danh sách các thành viên đã đặt món.\n /reset để xoá danh sách đã chọn món.\n /export để xuất danh sách đã chọn món ra excel.")
@@ -244,7 +274,6 @@ async def list_choices_command(update: Update, context: ContextTypes.DEFAULT_TYP
     await update.message.reply_text(response)
 
 # Lệnh /reset
-# Lệnh /reset
 async def reset_choices_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_choices.clear()
     user_states.clear()
@@ -337,6 +366,7 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler("update", update_menu_command))
 
     scheduler = BackgroundScheduler(timezone="Asia/Ho_Chi_Minh")
+    scheduler.add_job(clear_group_sheet, 'cron', day=5, hour=0, minute=0)
     scheduler.add_job(send_monthly_reminder, 'cron', day=6, hour=8, minute=0, args=[app])
     scheduler.start()
 
