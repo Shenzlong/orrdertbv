@@ -56,10 +56,10 @@ def save_to_google_sheets(data):
 
         sheet_url = "https://docs.google.com/spreadsheets/d/1FP-6syh0tBAf4Bdx4wzM9w9ENP9iSukMI_8Cwll2nLE"
         spreadsheet = client.open_by_url(sheet_url)
-        
+
         worksheet = spreadsheet.worksheet("Bot")
         worksheet_group = spreadsheet.worksheet("Group")
-        
+
         name = data.get("name", "").strip()
         all_records = worksheet.get_all_records()
 
@@ -90,9 +90,9 @@ def save_to_google_sheets(data):
                 data.get("size", ""),
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ])
-            
-# Ghi dữ liệu vào sheet Group            
-            worksheet_group.append_row([
+
+        # ✅ Luôn ghi vào sheet Group
+        worksheet_group.append_row([
             data.get("name", ""),
             data.get("drink_code", ""),
             data.get("sweetness", ""),
@@ -101,8 +101,8 @@ def save_to_google_sheets(data):
             data.get("ice", ""),
             data.get("size", ""),
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
-            
+        ])
+
         print("✅ Đã ghi dữ liệu vào Google Sheets.")
     except Exception as e:
         print("❌ Lỗi khi ghi Google Sheets:", e)
